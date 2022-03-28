@@ -1,7 +1,7 @@
 import logging
 import sys
 
-class Logger():
+class Logger(object):
     def __init__(self, name="traderpy", level=logging.DEBUG):
         self.logger = logging.getLogger(name)
         self.logger.setLevel(level)
