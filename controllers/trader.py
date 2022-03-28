@@ -2,14 +2,12 @@ import os
 import json
 from flask import request
 from flask import Blueprint
-from binance.client import Client 
-from traderpy.utils.logger import Logger
+from binance.client import Client
+from utils.logger import Logger
 
 log = Logger()
 bp = Blueprint("trader", __name__)
 WEBHOOK_PASSPHRASE = os.environ['WEBHOOK_PASSPHRASE']
-CLIENT_ONE = Client(os.environ['API_KEY_ONE'], os.environ['API_SECRET_ONE'])
-CLIENT_TWO = Client(os.environ['API_KEY_TWO'], os.environ['API_SECRET_TWO'])
 
 @bp.route("/", methods=['POST'])
 def webhook():
@@ -21,9 +19,9 @@ def webhook():
         ticker = data['strategy']['ticker']
 
         if data['client'] == '1':
-            client = CLIENT_ONE
+            client = Client(os.environ['API_KEY_ONE'], os.environ['API_SECRET_ONE'])
         else:
-            client = CLIENT_TWO
+            client = Client(os.environ['API_KEY_TWO'], os.environ['API_SECRET_TWO'])
 
         order_response = order(client, side, quantity, ticker)
 
