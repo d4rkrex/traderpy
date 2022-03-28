@@ -24,21 +24,21 @@ def webhook():
             client = Client(os.environ['API_KEY_TWO'], os.environ['API_SECRET_TWO'])
 
         order_response = order(client, side, quantity, ticker)
-        print(order_response)
+        log.info(order_response)
         if order_response:
             return buildResponse(200, 'success')
         else:
-            print(f' [*] - Error Trader - order_response - {order_response}')
+            log.info(f' [*] - Error Trader - order_response - {order_response}')
             return buildResponse(404, 'fail')
     else:
         return buildResponse(401, 'Error in inf statement')
 
 def order(client, side, quantity, symbol, order_type='ORDER_TYPE_MARKET'):
     try:
-        print("sending order {} - {} {} {}".format(order_type, side, quantity, symbol))
+        log.info("sending order {} - {} {} {}".format(order_type, side, quantity, symbol))
         order = client.create_order(symbol=symbol, side=side, type=order_type, quantity=quantity)
     except Exception as e:
-        print("an exception occured - {}".format(e))
+        log.info("an exception occured - {}".format(e))
         return False
     return order
 
