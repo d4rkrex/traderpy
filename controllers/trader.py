@@ -13,7 +13,7 @@ log = Logger()
 def webhook():
     data = json.loads(request.data)
     log.info(data)
-    if data['passphrase'] != WEBHOOK_PASSPHRASE:
+    if data['passphrase'] == WEBHOOK_PASSPHRASE:
         side = data['strategy']['order_action'].upper()
         quantity = data['strategy']['order_contracts']
         ticker = data['strategy']['ticker']
