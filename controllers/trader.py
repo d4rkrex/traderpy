@@ -3,6 +3,7 @@ import json
 from flask import request
 from flask import Blueprint
 from binance.client import Client
+from binance.enums import *
 from utils.logger import Logger
 
 bp = Blueprint("trader", __name__)
@@ -28,17 +29,17 @@ def webhook():
         if order_response:
             return buildResponse(200, 'success')
         else:
-            log.info(f' [*] - Error Trader - order_response - {order_response}')
+            log.error(f' [*] - Error Trader - order_response - {order_response}')
             return buildResponse(404, 'fail')
     else:
         return buildResponse(401, 'Error in inf statement')
 
-def order(client, side, quantity, symbol, order_type='ORDER_TYPE_MARKET'):
+def order(client, side, quantity, symbol, order_type=ORDER_TYPE_MARKET):
     try:
         log.info(f"sending order {order_type} - {side} - {quantity} - {symbol}")
         order = client.create_order(symbol=symbol, side=side, type=order_type, quantity=quantity)
     except Exception as e:
-        log.info(f"an exception occured - {e}")
+        log.error(f"an exception occured - {e}")
         return False
     return order
 
