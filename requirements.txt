@@ -1,0 +1,5 @@
+flask
+gunicorn
+python-binance
+configparser
+websocket_client
