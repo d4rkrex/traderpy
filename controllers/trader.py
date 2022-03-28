@@ -5,9 +5,9 @@ from flask import Blueprint
 from binance.client import Client
 from utils.logger import Logger
 
-log = Logger()
 bp = Blueprint("trader", __name__)
 WEBHOOK_PASSPHRASE = os.environ['WEBHOOK_PASSPHRASE']
+log = Logger()
 
 @bp.route("/", methods=['POST'])
 def webhook():
@@ -35,10 +35,10 @@ def webhook():
 
 def order(client, side, quantity, symbol, order_type='ORDER_TYPE_MARKET'):
     try:
-        log.info("sending order {} - {} {} {}".format(order_type, side, quantity, symbol))
+        log.info(f"sending order {order_type} - {side} - {quantity} - {symbol}")
         order = client.create_order(symbol=symbol, side=side, type=order_type, quantity=quantity)
     except Exception as e:
-        log.info("an exception occured - {}".format(e))
+        log.info(f"an exception occured - {e}")
         return False
     return order
 
