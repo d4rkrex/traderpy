@@ -14,10 +14,10 @@ def webhook():
     data = json.loads(request.data)
     log.info(data)
     if data['passphrase'] == WEBHOOK_PASSPHRASE:
+        ticker = data['ticker']
         side = data['strategy']['order_action'].upper()
         quantity = data['strategy']['order_contracts']
-        ticker = data['strategy']['ticker']
-
+        
         if data['client'] == '1':
             client = Client(os.environ['API_KEY_ONE'], os.environ['API_SECRET_ONE'])
         else:
