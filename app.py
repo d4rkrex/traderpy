@@ -1,6 +1,5 @@
 from flask import Flask
-from traderpy.controllers import ping
-from traderpy.controllers import trader
+from controllers import trader, ping
 
 def create_app():
     app = Flask(__name__)
@@ -8,3 +7,9 @@ def create_app():
     app.register_blueprint(ping.bp, url_prefix="/ping")
     app.register_blueprint(trader.bp, url_prefix="/webhook")
     return app
+
+app = create_app()
+
+if __name__ == "__main__":
+    with app.app_context():
+        app.run(host="0.0.0.0", port=8080, debug=True)
