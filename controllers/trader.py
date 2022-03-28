@@ -35,11 +35,11 @@ def webhook():
 
 def order(client, side, quantity, symbol, order_type='ORDER_TYPE_MARKET'):
     try:
-        log.info("sending order {} - {} {} {}".format(order_type, side, quantity, symbol))
+        print("sending order {} - {} {} {}".format(order_type, side, quantity, symbol))
         order = client.create_order(symbol=symbol, side=side, type=order_type, quantity=quantity)
-        log.info(order)
+        print(order)
     except Exception as e:
-        log.error("an exception occured - {}".format(e))
+        print("an exception occured - {}".format(e))
         return False
     return True
 
