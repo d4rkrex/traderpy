@@ -9,7 +9,7 @@ from utils.logger import Logger
 bp = Blueprint("trader", __name__)
 WEBHOOK_PASSPHRASE = os.environ['WEBHOOK_PASSPHRASE']
 log = Logger()
-ticker_dict = {"BTCUSDT":"BTC/USDT", "GMTUSDT":"GMT/USDT", "":"" }
+
 
 @bp.route("/", methods=['POST'])
 def webhook():
@@ -74,8 +74,7 @@ def client_one():
     return exchange
 
 def future_order(exchange, side, quantity, symbol, price, order_type=ORDER_TYPE_MARKET):
-    #exchange_class = getattr(ccxt, 'binance')
-    #exchange.verbose = True
+    ticker_dict = {"BTCUSDT":"BTC/USDT", "GMTUSDT":"GMT/USDT", "SOLUSDT":"SOL/USDT" }
     try:
         params = {
             'newClientOrderId': "{}-{}".format(price, side),
@@ -84,7 +83,7 @@ def future_order(exchange, side, quantity, symbol, price, order_type=ORDER_TYPE_
             'workingType': 'CONTRACT_PRICE',
             'reduceOnly': 'true',
         }
-        exchange.createOrder(symbol, 'TRAILING_STOP_MARKET', side, quantity, price, params)
+        order = exchange.createOrder(symbol, 'TRAILING_STOP_MARKET', side, quantity, price, params)
     except Exception as e:
         log.error(f"an exception occured - {e}")
         return False
