@@ -60,8 +60,9 @@ def buildResponse(statusCode, body=None):
     return response
 
 def client_one():
-    exchange_class = getattr(ccxt, 'binance')
-    exchange = exchange_class({
+    try:
+        exchange_class = getattr(ccxt, 'binance')
+        exchange = exchange_class({
             'apiKey': os.environ['API_KEY_ONE'],
             'secret': os.environ['API_SECRET_ONE'],
             'timeout': 10000,
@@ -70,7 +71,10 @@ def client_one():
             'options': {
                 'defaultType': 'future',
             }
-        })
+            })
+    except Exception as e:
+        log.error(f"an exception occured - {e}")
+        return False
     return exchange
 
 def future_order(exchange, side, quantity, symbol, price, order_type=ORDER_TYPE_MARKET):
