@@ -84,6 +84,7 @@ def future_order(exchange, side, quantity, symbol, price, order_type=ORDER_TYPE_
             'reduceOnly': 'true',
         }
         order = exchange.createOrder(symbol, 'TRAILING_STOP_MARKET', side, quantity, price, params)
+        log.info(order)
     except Exception as e:
         log.error(f"an exception occured - {e}")
         return False
