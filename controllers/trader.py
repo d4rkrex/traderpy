@@ -96,7 +96,7 @@ def order_creator(exchange, order_type, symbol, side, quantity, price, params):
     try:
         order = exchange.createOrder(symbol, order_type, side, quantity, price, params)
     except Exception as e:
-        log.error(f"an exception occured - {e}")
+        log.error("{} - an exception occured".format(order_type, e))
         return False
     return order
 
@@ -107,9 +107,9 @@ def future_order(exchange, side, quantity, symbol, order_type=ORDER_TYPE_MARKET)
         marketPrice = exchange.fetchFundingRate(symbol)['info']['markPrice'][:-9]
         if side == 'buy':
             stopPrice = int(marketPrice) - 0.005*int(marketPrice)
-            trailingPrice = int(marketPrice) + 0.002*int(marketPrice)
+            trailingPrice = int(marketPrice) + 0.003*int(marketPrice)
             order = order_creator(exchange, 'LIMIT', symbol, side, quantity, marketPrice, {'stopPrice': marketPrice , 'timeInForce':'GTC'} )
-            stopParams = {"stopPrice": stopPrice+10}
+            stopParams = {"stopPrice": stopPrice-1}
             stopOrder = order_creator(exchange,'STOP_MARKET', symbol, 'sell', quantity, stopPrice, stopParams )
             log.info(stopOrder)
             params = {
@@ -123,8 +123,8 @@ def future_order(exchange, side, quantity, symbol, order_type=ORDER_TYPE_MARKET)
             log.info(trailingOrder)
         else: 
             stopPrice = int(marketPrice) + 0.005*int(marketPrice)
-            trailingPrice = int(marketPrice) - 0.002*int(marketPrice)
-            stopParams = {"stopPrice": stopPrice-10}
+            trailingPrice = int(marketPrice) - 0.003*int(marketPrice)
+            stopParams = {"stopPrice": stopPrice+1}
             order = order_creator(exchange, 'LIMIT', symbol, side, quantity, marketPrice, {'stopPrice': marketPrice , 'timeInForce':'GTC'} )
             stopOrder = order_creator(exchange,'STOP_MARKET', symbol, 'buy', quantity, stopPrice, stopParams )
             params = {
