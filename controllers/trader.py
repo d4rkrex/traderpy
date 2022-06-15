@@ -109,7 +109,7 @@ def future_order(exchange, side, quantity, symbol, order_type=ORDER_TYPE_MARKET)
             stopPrice = int(marketPrice) - 0.005*int(marketPrice)
             trailingPrice = int(marketPrice) + 0.002*int(marketPrice)
             order = order_creator(exchange, 'LIMIT', symbol, side, quantity, marketPrice, {'stopPrice': marketPrice , 'timeInForce':'GTC'} )
-            stopParams = {"stopPrice": stopPrice+1}
+            stopParams = {"stopPrice": stopPrice+10}
             stopOrder = order_creator(exchange,'STOP_MARKET', symbol, 'sell', quantity, stopPrice, stopParams )
             log.info(stopOrder)
             params = {
@@ -119,12 +119,12 @@ def future_order(exchange, side, quantity, symbol, order_type=ORDER_TYPE_MARKET)
                 'workingType': 'CONTRACT_PRICE',
                 'reduceOnly': 'true',
             }
-            trailingOrder = order_creator(exchange,'TRAILING_STOP_MARKET', symbol, side, quantity,trailingPrice, params)
+            trailingOrder = order_creator(exchange,'TRAILING_STOP_MARKET', symbol, side, quantity, trailingPrice, params)
             log.info(trailingOrder)
         else: 
             stopPrice = int(marketPrice) + 0.005*int(marketPrice)
             trailingPrice = int(marketPrice) - 0.002*int(marketPrice)
-            stopParams = {"stopPrice": stopPrice-1}
+            stopParams = {"stopPrice": stopPrice-10}
             order = order_creator(exchange, 'LIMIT', symbol, side, quantity, marketPrice, {'stopPrice': marketPrice , 'timeInForce':'GTC'} )
             stopOrder = order_creator(exchange,'STOP_MARKET', symbol, 'buy', quantity, stopPrice, stopParams )
             params = {
@@ -134,7 +134,8 @@ def future_order(exchange, side, quantity, symbol, order_type=ORDER_TYPE_MARKET)
                 'workingType': 'CONTRACT_PRICE',
                 'reduceOnly': 'true',
             }
-            trailingOrder = order_creator(exchange,'TRAILING_STOP_MARKET', symbol, side, quantity, params)
+            trailingOrder = order_creator(exchange,'TRAILING_STOP_MARKET', symbol, side, quantity,trailingPrice, params)
+            log.info(trailingOrder)
     except Exception as e:
         log.error(f"an exception occured - {e}")
         return False
