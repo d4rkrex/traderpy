@@ -27,7 +27,7 @@ def webhook():
         else:
             client = Client(os.environ['API_KEY_TWO'], os.environ['API_SECRET_TWO'])
 
-        order_response = future_order(client, side, quantity, ticker, price)
+        order_response = future_order(client, side, quantity, ticker)
         #order_response = order(client, side, quantity, ticker)
         log.info(order_response)
         if order_response:
@@ -77,8 +77,7 @@ def client_one():
         return False
     return exchange
 
-def future_order(exchange, side, quantity, symbol, price, order_type=ORDER_TYPE_MARKET):
-    ticker_dict = {"BTCUSDT":"BTC/USDT", "GMTUSDT":"GMT/USDT", "SOLUSDT":"SOL/USDT" }
+def trailing_order(exchange, side, quantity, symbol, price, order_type=ORDER_TYPE_MARKET):
     try:
         params = {
             'newClientOrderId': "{}-{}".format(price, side),
@@ -87,8 +86,49 @@ def future_order(exchange, side, quantity, symbol, price, order_type=ORDER_TYPE_
             'workingType': 'CONTRACT_PRICE',
             'reduceOnly': 'true',
         }
-        order = exchange.createOrder(ticker_dict[symbol], 'TRAILING_STOP_MARKET', side, quantity, price, params)
+        order = exchange.createOrder(symbol, 'TRAILING_STOP_MARKET', side, quantity, price, params)
     except Exception as e:
         log.error(f"an exception occured - {e}")
         return False
+    return order
+
+def order_creator(exchange, order_type, symbol, side, quantity, price, params):
+    try:
+        order = exchange.createOrder(symbol, order_type, side, quantity, price, params)
+    except Exception as e:
+        log.error(f"an exception occured - {e}")
+        return False
+    return order
+
+def future_order(exchange, side, quantity, symbol, order_type=ORDER_TYPE_MARKET):
+    tickerDict = {"BTCUSDT":"BTC/USDT", "GMTUSDT":"GMT/USDT", "SOLUSDT":"SOL/USDT" }
+    symbol = tickerDict[symbol]
+    marketPrice = exchange.fetchFundingRate(symbol)['info']['markPrice'][:-9]
+    if side == 'buy':
+        stopPrice = int(marketPrice) - 0.005*int(marketPrice)
+        trailingPrice = int(marketPrice) + 0.002*int(marketPrice)
+        order = order_creator(exchange, 'LIMIT', symbol, side, quantity, marketPrice, {'stopPrice': marketPrice , 'timeInForce':'GTC'} )
+        stopParams = {"stopPrice": stopPrice+1}
+        stopOrder = order_creator(exchange,'STOP_MARKET', symbol, 'sell', quantity, stopPrice, stopParams )
+        params = {
+            'newClientOrderId': "{}-{}".format(trailingPrice, side),
+            'activationPrice': trailingPrice-1,  
+            'callbackRate': '2',
+            'workingType': 'CONTRACT_PRICE',
+            'reduceOnly': 'true',
+        }
+        trailingOrder = order_creator(exchange,'TRAILING_STOP_MARKET', symbol, side, quantity,trailingPrice, params)
+    else: 
+        stopPrice = int(marketPrice) + 0.005*int(marketPrice)
+        trailingPrice = int(marketPrice) - 0.002*int(marketPrice)
+        order = order_creator(exchange, 'LIMIT', symbol, side, quantity, marketPrice, {'stopPrice': marketPrice , 'timeInForce':'GTC'} )
+        stopOrder = order_creator(exchange,'STOP_MARKET', symbol, 'sell', stopPrice,{"stopPrice": stopPrice} )
+        params = {
+            'newClientOrderId': "{}-{}".format(trailingPrice, side),
+            'activationPrice': trailingPrice,  
+            'callbackRate': '2',
+            'workingType': 'CONTRACT_PRICE',
+            'reduceOnly': 'true',
+        }
+        trailingOrder = order_creator(exchange,'TRAILING_STOP_MARKET', symbol, side, quantity, params)
     return order
