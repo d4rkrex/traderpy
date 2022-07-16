@@ -21,14 +21,16 @@ def webhook():
         quantity = str(data['strategy']['order_contracts'])
         price = data['bar']['close']
         
-        if data['client'] == '1':
+        if data['client'] == 'futures':
             #client = Client(os.environ['API_KEY_ONE'], os.environ['API_SECRET_ONE'])
             client = client_one()
+            order_response = future_order(client, side, quantity, ticker)
         else:
-            client = Client(os.environ['API_KEY_TWO'], os.environ['API_SECRET_TWO'])
-
-        order_response = future_order(client, side, quantity, ticker)
-        #order_response = order(client, side, quantity, ticker)
+            #client = Client(os.environ['API_KEY_TWO'], os.environ['API_SECRET_TWO'])
+            client = Client(os.environ['API_KEY_ONE'], os.environ['API_SECRET_ONE'])
+        
+        order_response = order(client, side, quantity, ticker)
+        
         log.info(order_response)
         if order_response:
             return buildResponse(200, 'success')
