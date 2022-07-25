@@ -113,6 +113,7 @@ def order_approval(client, side, symbol):
         last_buy_price = float(orders[-1]['cummulativeQuoteQty']) * float(orders[-1]['origQty'])
         delta_percentage = last_buy_price * 0.05
         if Last_action == 'SELL':
+            log.info(f"[*] - Last action SELL")
             return True    
         else:
             if last_buy_price - actual_price > delta_percentage:
