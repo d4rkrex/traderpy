@@ -36,7 +36,8 @@ def webhook():
         
         if order_approval(client, side, ticker):
             order_response = order(client, side, quantity, ticker)
-        
+        else: order_response = False
+
         log.info(order_response)
         if order_response:
             return buildResponse(200, 'success')
@@ -110,14 +111,15 @@ def order_approval(client, side, symbol):
         Last_action = orders[-1]['side']
         actual_price = float(client.get_symbol_ticker(symbol=symbol)['price'])
         last_buy_price = float(orders[-1]['cummulativeQuoteQty']) * float(orders[-1]['origQty'])
-        delta_percentage = last_buy_price * 0.02
+        delta_percentage = last_buy_price * 0.03
         if Last_action == 'SELL':
             return True    
         else:
-            if last_buy_price - actual_price > delta_percentage: 
+            if last_buy_price - actual_price > delta_percentage:
+                log.info(f"[*] - Price delta is last {last_buy_price} - actual {actual_price} = {last_buy_price - actual_price}") 
                 return True
             else:
-                log.error("[*] - Price delta is under 2%")
+                log.error(f"[*] - Price delta is under 2%")
                 return False
 
 
