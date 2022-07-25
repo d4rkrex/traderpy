@@ -111,7 +111,7 @@ def order_approval(client, side, symbol):
         Last_action = orders[-1]['side']
         actual_price = float(client.get_symbol_ticker(symbol=symbol)['price'])
         last_buy_price = float(orders[-1]['cummulativeQuoteQty']) * float(orders[-1]['origQty'])
-        delta_percentage = last_buy_price * 0.04
+        delta_percentage = last_buy_price * 0.05
         if Last_action == 'SELL':
             return True    
         else:
@@ -119,7 +119,7 @@ def order_approval(client, side, symbol):
                 log.info(f"[*] - Price delta is last {last_buy_price} - actual {actual_price} = {last_buy_price - actual_price} es mayor que {delta_percentage}") 
                 return True
             else:
-                log.error(f"[*] - Price delta is under 4%")
+                log.error(f"[*] - Price delta is under 5%")
                 return False
 
 
