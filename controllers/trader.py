@@ -5,11 +5,16 @@ from flask import Blueprint
 from binance.client import Client
 from binance.enums import *
 from utils.logger import Logger
+from datetime import datetime, timedelta
 
+
+
+#### Variables
 bp = Blueprint("trader", __name__)
 WEBHOOK_PASSPHRASE = os.environ['WEBHOOK_PASSPHRASE']
 log = Logger()
-
+days_delta = 3
+price_delta = 1
 
 @bp.route("/", methods=['POST'])
 def webhook():
@@ -29,7 +34,8 @@ def webhook():
             #client = Client(os.environ['API_KEY_TWO'], os.environ['API_SECRET_TWO'])
             client = Client(os.environ['API_KEY_ONE'], os.environ['API_SECRET_ONE'])
         
-        order_response = order(client, side, quantity, ticker)
+        if order_approval(client, side, ticker):
+            order_response = order(client, side, quantity, ticker)
         
         log.info(order_response)
         if order_response:
@@ -93,6 +99,31 @@ def trailing_order(exchange, side, quantity, symbol, price, order_type=ORDER_TYP
         log.error(f"an exception occured - {e}")
         return False
     return order
+
+def order_approval(client, side, symbol):
+    try:
+        orders = client.get_all_orders(symbol=symbol, limit=1)
+    except Exception as e:
+        log.error(f"an exception occured - {e}") 
+    if side == 'SELL': return True
+    else:
+        Last_action = orders[-1]['side']
+        actual_price = float(client.get_symbol_ticker(symbol=symbol)['price'])
+        last_buy_price = float(orders[-1]['cummulativeQuoteQty']) * float(orders[-1]['origQty'])
+        delta_percentage = last_buy_price * 0.02
+        if Last_action == 'SELL':
+            return True    
+        else:
+            if last_buy_price - actual_price > delta_percentage: 
+                return True
+            else:
+                log.error("[*] - Price delta is under 2%")
+                return False
+
+
+
+
+
 
 def order_creator(exchange, order_type, symbol, side, quantity, price, params):
     try:
