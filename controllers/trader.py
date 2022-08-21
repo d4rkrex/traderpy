@@ -15,6 +15,7 @@ WEBHOOK_PASSPHRASE = os.environ['WEBHOOK_PASSPHRASE']
 log = Logger()
 days_delta = 3
 price_delta = 1
+total2 = {"BNBUSDT":0.2,"MATICUSDT":30,"NEARUSDT":4,"SOLUSDT":1.3,"ADAUSDT":70}
 
 @bp.route("/", methods=['POST'])
 def webhook():
@@ -34,10 +35,17 @@ def webhook():
             #client = Client(os.environ['API_KEY_TWO'], os.environ['API_SECRET_TWO'])
             client = Client(os.environ['API_KEY_ONE'], os.environ['API_SECRET_ONE'])
         
-        if order_approval(client, side, ticker):
-            order_response = order(client, side, quantity, ticker)
-        else: order_response = False
-
+        if ticker == "total2":
+            for t in total2:
+                if order_approval(client, side, t):
+                    order_response = order(client, side, quantity, t)
+                    log.info(order_response)
+                else: order_response = False
+        else:
+            if order_approval(client, side, ticker):
+                order_response = order(client, side, quantity, ticker)
+            else: order_response = False
+        
         log.info(order_response)
         if order_response:
             return buildResponse(200, 'success')
