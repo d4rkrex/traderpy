@@ -37,6 +37,7 @@ def webhook():
         
         if ticker == "total2":
             for t in total2:
+                print(t)
                 log.info(t)
                 if order_approval(client, side, t):
                     order_response = order(client, side, total2[t], t)
@@ -111,6 +112,7 @@ def trailing_order(exchange, side, quantity, symbol, price, order_type=ORDER_TYP
     return order
 
 def order_approval(client, side, symbol):
+    print(symbol)
     try:
         orders = client.get_all_orders(symbol=symbol, limit=1)
     except Exception as e:
