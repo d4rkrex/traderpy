@@ -37,8 +37,8 @@ def webhook():
         
         if ticker == "total2":
             for t in total2:
+                log.info(t)
                 if order_approval(client, side, t):
-                    log.info(t)
                     order_response = order(client, side, total2[t], t)
                     log.info(order_response)
                 else: order_response = False
