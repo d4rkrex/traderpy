@@ -118,6 +118,8 @@ def order_approval(client, side, symbol):
     print(symbol)
     try:
         orders = client.get_all_orders(symbol=symbol, limit=1)
+        if orders:
+            return True
     except Exception as e:
         log.error(f"an exception occured - {e}") 
     if side == 'SELL': return True
