@@ -6,6 +6,7 @@ from binance.client import Client
 from binance.enums import *
 from utils.logger import Logger
 from datetime import datetime, timedelta
+from bingX import BingX
 
 
 
@@ -29,8 +30,9 @@ def webhook():
         
         if data['client'] == 'futures':
             #client = Client(os.environ['API_KEY_ONE'], os.environ['API_SECRET_ONE'])
-            client = client_one()
-            order_response = future_order(client, side, quantity, ticker)
+            check_and_open_position(ticker, quantity, side)
+            #client = client_one()
+            #order_response = future_order(client, side, quantity, ticker)
         else:
             #client = Client(os.environ['API_KEY_TWO'], os.environ['API_SECRET_TWO'])
             client = Client(os.environ['API_KEY_ONE'], os.environ['API_SECRET_ONE'])
@@ -136,9 +138,6 @@ def order_approval(client, side, symbol):
 
 
 
-
-
-
 def order_creator(exchange, order_type, symbol, side, quantity, price, params):
     try:
         order = exchange.createOrder(symbol, order_type, side, quantity, price, params)
@@ -187,3 +186,56 @@ def future_order(exchange, side, quantity, symbol, order_type=ORDER_TYPE_MARKET)
         log.error(f"an exception occured - {e}")
         return False
     return order
+
+
+def get_current_price(symbol):
+    try:
+        keyS = os.environ['API_KEY_2']
+        secretK = os.environ['API_SECRET_2']
+        bingx_client = BingX(api_key=keyS, secret_key=secretK)
+        # Obtén el precio actual del símbolo
+        ticker_response = bingx_client.perpetual_v2.market.get_ticker(symbol)
+        current_price = float(ticker_response['lastPrice'])
+        return current_price
+    except Exception as e:
+        print(f"Error al obtener el precio actual: {e}")
+        log.error(f"[*] - Error al ejecutar la orden ")
+        return None
+
+def check_and_open_position(symbol, quantity, side):
+    try:
+        # Obtén todas las posiciones abiertas
+        positions_response = bingx_client.perpetual_v2.account.get_swap_positions()
+    except Exception as e:
+        print(f"Error al obtener posiciones: {e}")
+        log.info(f"[*] - Error al obtener posiciones:")
+        return
+    # Busca una posición existente del símbolo
+    existing_position = None
+    for position in positions_response:
+        if position['symbol'] == symbol:
+            existing_position = position
+            break
+    # Si existe una posición, verifica el precio actual
+    if existing_position:
+        entry_price = float(existing_position['entryPrice'])
+        current_price = get_current_price(symbol)
+        if current_price is None or current_price >= entry_price * 0.95:
+            print("El precio actual no está un 5% por debajo del precio de apertura o no se pudo obtener el precio actual.")
+            log.info(f"[*] - El precio actual no está un 5% por debajo del precio de apertura o no se pudo obtener el precio actual.")
+            return
+    # Si no existe una posición o si el precio actual está un 5% por debajo del precio de apertura,
+    # abre una nueva posición con un apalancamiento de 10x
+    try:
+        order_response = bingx_client.perpetual_v2.trade.create_order(
+            symbol=symbol,
+            side=side,  # "BUY" para abrir, "SELL" para cerrar
+            type="MARKET",
+            quantity=quantity,
+            leverage="10"  # Apalancamiento de 10x
+        )
+        print(f"Orden {side} ejecutada con éxito: {order_response}")
+        log.error(f"[*] - Error al ejecutar la orden ")
+    except Exception as e:
+        print(f"Error al ejecutar la orden {side}: {e}")
+        log.error(f"[*] - Error al ejecutar la orden ")
