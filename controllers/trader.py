@@ -124,7 +124,12 @@ def order_approval(client, side, symbol):
         log.error(f"an exception occured - {e}") 
     if side == 'SELL': return True
     else:
-        Last_action = orders[-1]['side']
+        try:
+            Last_action = orders[-1]['side']
+        except Exception as e:
+            print(f"Error al obtener el precio actual: {e}")
+            log.error(f"[*] - Error al ejecutar la orden {e}")
+            return True
         actual_price = float(client.get_symbol_ticker(symbol=symbol)['price'])
         last_buy_price = float(orders[-1]['cummulativeQuoteQty']) * float(orders[-1]['origQty'])
         delta_percentage = last_buy_price * 0.05
