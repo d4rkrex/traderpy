@@ -118,6 +118,7 @@ def order_approval(client, side, symbol):
     print(symbol)
     try:
         orders = client.get_all_orders(symbol=symbol, limit=1)
+        print(orders)
         if not orders:
             return True
     except Exception as e:
@@ -131,13 +132,16 @@ def order_approval(client, side, symbol):
             log.error(f"[*] - Error al ejecutar la orden {e}")
             return True
         actual_price = float(client.get_symbol_ticker(symbol=symbol)['price'])
+        print(f"actual price: {actual_price}")
         last_buy_price = float(orders[-1]['cummulativeQuoteQty']) * float(orders[-1]['origQty'])
+        print(f"last buy: {last_buy_price}")
         delta_percentage = last_buy_price * 0.05
         if Last_action == 'SELL':
             log.info(f"[*] - Last action SELL")
             return True    
         else:
             if last_buy_price - actual_price > delta_percentage:
+                print(f"[*] - Price delta is last {last_buy_price} - actual {actual_price} = {last_buy_price - actual_price} es mayor que {delta_percentage}")
                 log.info(f"[*] - Price delta is last {last_buy_price} - actual {actual_price} = {last_buy_price - actual_price} es mayor que {delta_percentage}") 
                 return True
             else:
@@ -148,7 +152,7 @@ def order_creator(exchange, order_type, symbol, side, quantity, price, params):
     try:
         order = exchange.createOrder(symbol, order_type, side, quantity, price, params)
     except Exception as e:
-        log.error("{} - an exception occured".format(order_type, e))
+        log.error("{} - an exception occured en la orden".format(order_type, e))
         return False
     return order
 
