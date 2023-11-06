@@ -234,7 +234,7 @@ def check_and_open_position(symbol, quantity, side):
             leverage="10"  # Apalancamiento de 10x
         )
         print(f"Orden {side} ejecutada con éxito: {order_response}")
-        log.error(f"[*] - Error al ejecutar la orden ")
+        log.info(f"Orden {side} ejecutada con éxito: {order_response}")
     except Exception as e:
         print(f"Error al ejecutar la orden {side}: {e}")
         log.error(f"[*] - Error al ejecutar la orden ")
