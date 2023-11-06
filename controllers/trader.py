@@ -31,6 +31,7 @@ def webhook():
         if data['client'] == 'futures':
             #client = Client(os.environ['API_KEY_ONE'], os.environ['API_SECRET_ONE'])
             check_and_open_position(ticker, quantity, side)
+            return buildResponse(200, 'success')
             #client = client_one()
             #order_response = future_order(client, side, quantity, ticker)
         else:
