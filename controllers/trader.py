@@ -136,8 +136,6 @@ def order_approval(client, side, symbol):
                 log.error(f"[*] - Price delta is under 5%")
                 return False
 
-
-
 def order_creator(exchange, order_type, symbol, side, quantity, price, params):
     try:
         order = exchange.createOrder(symbol, order_type, side, quantity, price, params)
@@ -190,9 +188,6 @@ def future_order(exchange, side, quantity, symbol, order_type=ORDER_TYPE_MARKET)
 
 def get_current_price(symbol):
     try:
-        keyS = os.environ['API_KEY_2']
-        secretK = os.environ['API_SECRET_2']
-        bingx_client = BingX(api_key=keyS, secret_key=secretK)
         # Obtén el precio actual del símbolo
         ticker_response = bingx_client.perpetual_v2.market.get_ticker(symbol)
         current_price = float(ticker_response['lastPrice'])
@@ -205,6 +200,9 @@ def get_current_price(symbol):
 def check_and_open_position(symbol, quantity, side):
     try:
         # Obtén todas las posiciones abiertas
+        keyS = os.environ['API_KEY_2']
+        secretK = os.environ['API_SECRET_2']
+        bingx_client = BingX(api_key=keyS, secret_key=secretK)
         positions_response = bingx_client.perpetual_v2.account.get_swap_positions()
     except Exception as e:
         print(f"Error al obtener posiciones: {e}")
