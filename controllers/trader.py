@@ -16,7 +16,8 @@ WEBHOOK_PASSPHRASE = os.environ['WEBHOOK_PASSPHRASE']
 log = Logger()
 days_delta = 3
 price_delta = 1
-total2 = {"BNBUSDT":0.2,"MATICUSDT":30,"NEARUSDT":4,"SOLUSDT":1.3,"ADAUSDT":70}
+total2 = {"BNBUSDT":0.2,"MATICUSDT":45,"NEARUSDT":6,"DOTUSDT":15,"ADAUSDT":150}
+total2sell = {"BNBUSDT":0.1,"MATICUSDT":15,"NEARUSDT":2,"DOTUSDT":5,"ADAUSDT":50}
 
 @bp.route("/", methods=['POST'])
 def webhook():
@@ -39,13 +40,22 @@ def webhook():
             client = Client(os.environ['API_KEY_ONE'], os.environ['API_SECRET_ONE'])
         
         if ticker == "total2":
-            for t in total2:
-                print(t)
-                log.info(t)
-                if order_approval(client, side, t):
-                    order_response = order(client, side, total2[t], t)
-                    log.info(order_response)
-                else: order_response = False
+            if side == "buy":
+                for t in total2:
+                    print(t)
+                    log.info(t)
+                    if order_approval(client, side, t):
+                        order_response = order(client, side, total2[t], t)
+                        log.info(order_response)
+                    else: order_response = False
+            else:
+                for t in total2sell:
+                    print(t)
+                    log.info(t)
+                    if order_approval(client, side, t):
+                        order_response = order(client, side, total2[t], t)
+                        log.info(order_response)
+                    else: order_response = False
         else:
             if order_approval(client, side, ticker):
                 order_response = order(client, side, quantity, ticker)
@@ -118,6 +128,7 @@ def order_approval(client, side, symbol):
     print(symbol)
     try:
         orders = client.get_all_orders(symbol=symbol, limit=1)
+        print("Ultima orden fue:")
         print(orders)
         if not orders:
             return True
@@ -128,8 +139,8 @@ def order_approval(client, side, symbol):
         try:
             Last_action = orders[-1]['side']
         except Exception as e:
-            print(f"Error al obtener el precio actual: {e}")
-            log.error(f"[*] - Error al ejecutar la orden {e}")
+            print(f"Error al obtener ultima orden: {e}")
+            log.error(f"[*] - Error al obtener ultima orden: {e}")
             return True
         actual_price = float(client.get_symbol_ticker(symbol=symbol)['price'])
         print(f"actual price: {actual_price}")
